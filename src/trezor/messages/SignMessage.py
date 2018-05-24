@@ -5,6 +5,7 @@ if __debug__:
         from typing import List
     except ImportError:
         List = None
+from .InputScriptType import InputScriptType
 
 
 class SignMessage(p.MessageType):
@@ -13,7 +14,7 @@ class SignMessage(p.MessageType):
         1: ('address_n', p.UVarintType, p.FLAG_REPEATED),
         2: ('message', p.BytesType, 0),  # required
         3: ('coin_name', p.UnicodeType, 0),  # default='Bitcoin'
-        4: ('script_type', p.UVarintType, 0),  # default=0
+        4: ('script_type', InputScriptType, 0),  # default=0
     }
 
     def __init__(
@@ -21,7 +22,7 @@ class SignMessage(p.MessageType):
         address_n: List[int] = None,
         message: bytes = None,
         coin_name: str = None,
-        script_type: int = None
+        script_type: InputScriptType = None
     ) -> None:
         self.address_n = address_n if address_n is not None else []
         self.message = message

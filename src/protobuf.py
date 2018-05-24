@@ -65,6 +65,10 @@ class BoolType:
     WIRE_TYPE = 0
 
 
+class EnumType(int):
+    WIRE_TYPE = 0
+
+
 class BytesType:
     WIRE_TYPE = 2
 
@@ -155,6 +159,8 @@ async def load_message(reader, msg_type):
             fvalue = (ivalue >> 1) ^ ((ivalue << 63) & 0xffffffffffffffff)
         elif ftype is BoolType:
             fvalue = bool(ivalue)
+        elif issubclass(ftype, EnumType):
+            fvalue = ftype(ivalue)
         elif ftype is BytesType:
             fvalue = bytearray(ivalue)
             await reader.areadinto(fvalue)
@@ -216,6 +222,9 @@ async def dump_message(writer, msg):
                 await dump_uvarint(writer, ((svalue << 1) & 0xffffffffffffffff) ^ (svalue >> 63))
 
             elif ftype is BoolType:
+                await dump_uvarint(writer, int(svalue))
+
+            elif issubclass(ftype, EnumType):
                 await dump_uvarint(writer, int(svalue))
 
             elif ftype is BytesType:

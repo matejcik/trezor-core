@@ -5,6 +5,7 @@ if __debug__:
         from typing import List
     except ImportError:
         List = None
+from .NEMMosaicLevy import NEMMosaicLevy
 
 
 class NEMMosaicDefinition(p.MessageType):
@@ -14,7 +15,7 @@ class NEMMosaicDefinition(p.MessageType):
         3: ('namespace', p.UnicodeType, 0),
         4: ('mosaic', p.UnicodeType, 0),
         5: ('divisibility', p.UVarintType, 0),
-        6: ('levy', p.UVarintType, 0),
+        6: ('levy', NEMMosaicLevy, 0),
         7: ('fee', p.UVarintType, 0),
         8: ('levy_address', p.UnicodeType, 0),
         9: ('levy_namespace', p.UnicodeType, 0),
@@ -33,7 +34,7 @@ class NEMMosaicDefinition(p.MessageType):
         namespace: str = None,
         mosaic: str = None,
         divisibility: int = None,
-        levy: int = None,
+        levy: NEMMosaicLevy = None,
         fee: int = None,
         levy_address: str = None,
         levy_namespace: str = None,

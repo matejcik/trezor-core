@@ -5,6 +5,7 @@ if __debug__:
         from typing import List
     except ImportError:
         List = None
+from .InputScriptType import InputScriptType
 from .MultisigRedeemScriptType import MultisigRedeemScriptType
 
 
@@ -15,7 +16,7 @@ class GetAddress(p.MessageType):
         2: ('coin_name', p.UnicodeType, 0),  # default='Bitcoin'
         3: ('show_display', p.BoolType, 0),
         4: ('multisig', MultisigRedeemScriptType, 0),
-        5: ('script_type', p.UVarintType, 0),  # default=0
+        5: ('script_type', InputScriptType, 0),  # default=0
     }
 
     def __init__(
@@ -24,7 +25,7 @@ class GetAddress(p.MessageType):
         coin_name: str = None,
         show_display: bool = None,
         multisig: MultisigRedeemScriptType = None,
-        script_type: int = None
+        script_type: InputScriptType = None
     ) -> None:
         self.address_n = address_n if address_n is not None else []
         self.coin_name = coin_name

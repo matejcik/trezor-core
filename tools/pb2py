@@ -16,7 +16,6 @@ def parse_field(number, field):
     FIELD_TYPES = {
         field.TYPE_UINT64:  ('p.UVarintType', 'int'),
         field.TYPE_UINT32:  ('p.UVarintType', 'int'),
-        field.TYPE_ENUM:    ('p.UVarintType', 'int'),
         field.TYPE_SINT32:  ('p.SVarintType', 'int'),
         field.TYPE_SINT64:  ('p.SVarintType', 'int'),
         field.TYPE_STRING:  ('p.UnicodeType', 'str'),
@@ -27,6 +26,8 @@ def parse_field(number, field):
     required = (field.label == field.LABEL_REQUIRED)
     if field.type == field.TYPE_MESSAGE:
         proto_type = py_type = field.message_type.name
+    elif field.type == field.TYPE_ENUM:
+        proto_type = py_type = field.enum_type.name
     else:
         try:
             proto_type, py_type = FIELD_TYPES[field.type]
@@ -68,6 +69,8 @@ def process_message_imports(descriptor):
     for field in descriptor.fields:
         if field.type == field.TYPE_MESSAGE:
             imports.add(field.message_type.name)
+        elif field.type == field.TYPE_ENUM:
+            imports.add(field.enum_type.name)
 
     for name in sorted(imports):
         yield create_message_import(name)
@@ -89,13 +92,17 @@ def create_init_method(fields):
             yield "        self.{0} = {0}".format(field.name)
 
 
-def process_message(descriptor, protobuf_module, msg_id, is_upy):
-    logging.debug("Processing message %s", descriptor.name)
-
+def import_protobuf(is_upy):
     if is_upy:
         yield "import protobuf as p"
     else:
         yield "from .. import protobuf as p"
+
+
+def process_message(descriptor, protobuf_module, msg_id, is_upy):
+    logging.debug("Processing message %s", descriptor.name)
+
+    yield from import_protobuf(is_upy)
 
     fields = list(parse_field(number, field)
                   for number, field
@@ -148,20 +155,23 @@ def process_message(descriptor, protobuf_module, msg_id, is_upy):
 
 def process_enum(descriptor, is_upy):
     logging.debug("Processing enum %s", descriptor.name)
+    enum_prefix = descriptor.name
+
+    yield from import_protobuf(is_upy)
+    yield ""
+    yield "class %s(p.EnumType):" % enum_prefix
 
     for name, value in descriptor.values_by_name.items():
         # Remove type name from the beginning of the constant
         # For example "PinMatrixRequestType_Current" -> "Current"
-        enum_prefix = descriptor.name
         name = remove_from_start(name, "%s_" % enum_prefix)
 
         # If type ends with *Type, but constant use type name without *Type, remove it too :)
         # For example "ButtonRequestType & ButtonRequest_Other" => "Other"
         if enum_prefix.endswith("Type"):
-            enum_prefix, _ = enum_prefix.rsplit("Type", 1)
-            name = remove_from_start(name, "%s_" % enum_prefix)
+            name = remove_from_start(name, "%s_" % enum_prefix[:-4])
 
-        yield "%s = %s" % (name, value.number)
+        yield "    %s = %s" % (name, value.number)
 
 
 def process_file(descriptor, protobuf_module, genpath, modlist, is_upy):
@@ -185,7 +195,10 @@ def process_file(descriptor, protobuf_module, genpath, modlist, is_upy):
         out = process_enum(enum_descriptor, is_upy)
         write_to_file(genpath, name, out)
         if modlist:
-            modlist.write("from . import %s\n" % name)
+            if is_upy:
+                modlist.write("from . import %s\n" % name)
+            else:
+                modlist.write("from .%s import %s\n" % (name, name))
 
 
 def write_to_file(genpath, t, out):

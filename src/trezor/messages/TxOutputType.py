@@ -6,6 +6,7 @@ if __debug__:
     except ImportError:
         List = None
 from .MultisigRedeemScriptType import MultisigRedeemScriptType
+from .OutputScriptType import OutputScriptType
 
 
 class TxOutputType(p.MessageType):
@@ -13,7 +14,7 @@ class TxOutputType(p.MessageType):
         1: ('address', p.UnicodeType, 0),
         2: ('address_n', p.UVarintType, p.FLAG_REPEATED),
         3: ('amount', p.UVarintType, 0),  # required
-        4: ('script_type', p.UVarintType, 0),  # required
+        4: ('script_type', OutputScriptType, 0),  # required
         5: ('multisig', MultisigRedeemScriptType, 0),
         6: ('op_return_data', p.BytesType, 0),
         7: ('decred_script_version', p.UVarintType, 0),
@@ -24,7 +25,7 @@ class TxOutputType(p.MessageType):
         address: str = None,
         address_n: List[int] = None,
         amount: int = None,
-        script_type: int = None,
+        script_type: OutputScriptType = None,
         multisig: MultisigRedeemScriptType = None,
         op_return_data: bytes = None,
         decred_script_version: int = None
