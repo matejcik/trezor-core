@@ -8,7 +8,7 @@ compiler:
 
 env:
   global:
-    PROTOBUF_VERSION=3.4.0
+    - PROTOBUF_VERSION=3.4.0
   matrix:
     - GOAL=stm32 TOOLCHAIN_SHORTVER=7-2017q4 TOOLCHAIN_LONGVER=gcc-arm-none-eabi-7-2017-q4-major
     - GOAL=unix
@@ -38,8 +38,8 @@ install:
     - curl -LO "https://github.com/google/protobuf/releases/download/v${PROTOBUF_VERSION}/protoc-${PROTOBUF_VERSION}-linux-x86_64.zip"
     - unzip "protoc-${PROTOBUF_VERSION}-linux-x86_64.zip" -d protoc
     - export PATH="$(pwd)/protoc/bin:$PATH"
+    - pip install --user "protobuf==$PROTOBUF_VERSION"
     - pipenv install
-    - pipenv install "protobuf==$PROTOBUF_VERSION"
 
 before_script:
     - test "$GOAL" != "stm32" || wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/$TOOLCHAIN_SHORTVER/$TOOLCHAIN_LONGVER-linux.tar.bz2
