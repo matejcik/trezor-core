@@ -46,6 +46,7 @@ install:
     - export PKG_CONFIG_PATH=$HOME/libsodium/lib/pkgconfig:$PKG_CONFIG_PATH
     - export LD_LIBRARY_PATH=$HOME/libsodium/lib:$LD_LIBRARY_PATH
     - pipenv install
+    # just a comment
 
 before_script:
     - test "$GOAL" != "stm32" || wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/$TOOLCHAIN_SHORTVER/$TOOLCHAIN_LONGVER-linux.tar.bz2
